@@ -52,33 +52,37 @@ def add_time(start_time, duration, start_day=None):
 
     # Calculate days
     days = round(sum_hours / 24)
+
     if initial_values['start time'][2] == 'AM' and half_days <= 1:
         final_values['final day'] = initial_values['start day']
-    elif initial_values['start time'][2] == 'PM' and half_days == 0:
-        final_values['final day'] = initial_values['start day']
-    elif initial_values['start time'][2] == 'PM' and half_days == 1:
-        final_values['final day'] = get_final_day(initial_values['start day'], half_days, days_week)
+
+    elif initial_values['start time'][2] == 'AM' and (half_days == 2 or half_days == 3):
+        final_values['final day'] = get_final_day(initial_values['start day'], days, days_week)
         final_values['num days later'] = '(next day)'
-        final_values['flag'] = True
-    elif initial_values['start time'][2] == 'AM' and half_days > 1:
-        final_values['num days later'] = '(' + str(days) + ' days later)'
-        final_values['flag'] = True
-    elif initial_values['start time'][2] == 'PM' and half_days > 1:
+
+    elif initial_values['start time'][2] == 'AM' and half_days > 3:
         final_values['final day'] = get_final_day(initial_values['start day'], days, days_week)
         final_values['num days later'] = '(' + str(days) + ' days later)'
-        final_values['flag'] = True
+
+    elif initial_values['start time'][2] == 'PM' and half_days == 0:
+        final_values['final day'] = initial_values['start day']
+
+    elif initial_values['start time'][2] == 'PM' and (half_days == 1 or half_days == 2):
+        final_values['final day'] = get_final_day(initial_values['start day'], days, days_week)
+        final_values['num days later'] = '(next day)'
+
+    elif initial_values['start time'][2] == 'PM' and half_days >= 3:
+        final_values['final day'] = get_final_day(initial_values['start day'], days, days_week)
+        final_values['num days later'] = '(' + str(days) + ' days later)'
+
     else:
         print('error')
     
-    # Format output
+    # Formating output
     new_time = f"{final_values['final time'][0]}:{final_values['final time'][1]} {final_values['final time'][2]}"
-    if start_day is not None and final_values['flag'] == True:
-        print(new_time + ',' , final_values['final day'], final_values['num days later'])
-    elif start_day is None and final_values['flag'] == True:
-        print(new_time + ',', final_values['num days later'])
-    else:
-        print(new_time)
-    return new_time
+    formated_time = get_output(start_day, initial_values, final_values, half_days, new_time)
+
+    return formated_time
 
 def split_time(time):
     final_time = []
@@ -107,4 +111,49 @@ def get_final_day(start_day, half_days, days_week):
             aux = (i + half_days) % len(days_week)
             return days_week[aux]
 
-add_time("11:30 AM", "2:32", "Monday")
+def get_output(start_day, initial_values, final_values, half_days, new_time):
+    if final_values['num days later'] == '(next day)':
+        if start_day is None:
+            return f"{new_time} {final_values['num days later']}"
+        else:
+            return f"{new_time}, {final_values['final day']} {final_values['num days later']}"
+
+    else:
+        if initial_values['start time'][2] == 'AM':
+            if half_days <= 1:
+                if start_day is None:
+                    return f"{new_time}"
+                else:
+                    return f"{new_time}, {final_values['final day']}"
+            elif (half_days == 2 or half_days == 3):
+                if start_day is None:
+                    return f"{new_time}"
+                else:
+                    return f"{new_time}, {final_values['final day']} {final_values['num days later']}"
+            else:
+                if start_day is None:
+                    return f"{new_time} {final_values['num days later']}"
+                else:
+                    return f"{new_time}, {final_values['final day']} {final_values['num days later']} "
+
+        elif initial_values['start time'][2] == 'PM':
+            if half_days == 0:
+                if start_day is None:
+                    return f"{new_time}"
+                else:
+                    return f"{new_time}, {final_values['final day']}"
+            elif (half_days == 1 or half_days == 2):
+                if start_day is None:
+                    return f"{new_time}"
+                else:
+                    return f"{new_time}, {final_values['final day']} {final_values['num days later']}  "     
+            else:
+                if start_day is None:
+                    return f"{new_time} {final_values['num days later']}"
+                else:
+                    return f"{new_time}, {final_values['final day']} {final_values['num days later']}"
+
+        else:
+            return 'error'
+
+# print(add_time("11:55 AM", "3:12"))
